@@ -1,0 +1,9 @@
+node_modules/
+lib/
+*.log
+.DS_Store
+
+# Never commit credentials or local notes.
+.env
+.env.*
+!.env.example
