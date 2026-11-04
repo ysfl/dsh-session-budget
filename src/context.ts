@@ -18,6 +18,12 @@ export interface WebServerFace {
   register(route: WebRoute): () => void
 }
 
+/** Structural face of the `credentials` service; the balance read uses it to
+ *  resolve `DEEPSEEK_API_KEY` without ever storing the key itself. */
+export interface CredentialsFace {
+  resolve(ref: string): Promise<{ value: string; source: string } | undefined>
+}
+
 /** Structural face of the host `sessionPersistence` service. */
 export interface SessionHeaderFace {
   id?: string
@@ -63,8 +69,11 @@ export interface SessionPersistenceFace {
   open?(id: string, access: 'read'): Promise<SessionHandleFace>
 }
 
-/** The host context this plugin's apply() receives. */
+/** The host context this plugin's apply() receives. `credentials` is optional
+ *  so a host that does not expose it still loads the session surfaces; the
+ *  balance panel then reports "no balance available". */
 export interface HostContext extends Context {
   webServer: WebServerFace
   sessionPersistence: SessionPersistenceFace
+  credentials?: CredentialsFace
 }

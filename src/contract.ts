@@ -1,5 +1,24 @@
 /** Wire contracts shared by the host API and the client fetchers. */
 
+/** One balance bucket returned by the provider (usually one currency). */
+export interface BalanceInfo {
+  currency: string
+  total: string
+  granted: string
+  toppedUp: string
+}
+
+export interface BalanceData {
+  isAvailable: boolean
+  balances: BalanceInfo[]
+}
+
+export interface BalanceResponse {
+  ok: boolean
+  error?: string
+  data?: BalanceData
+}
+
 /** CNY per 1M tokens for one model tier. */
 export interface PricingRates {
   cacheHit: number

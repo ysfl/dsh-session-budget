@@ -10,7 +10,7 @@
  */
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react'
 import type { InputActionsFace, UseInputHook } from './context.ts'
-import { fetchSessionUsage } from './api.ts'
+import { fetchBalance, fetchSessionUsage, getCachedBalance } from './api.ts'
 import { fmtCost } from './format.ts'
 import { useI18n } from './i18n.tsx'
 import {
@@ -44,6 +44,7 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
   const [open, setOpen] = useState(false)
   const [expiryHours, setExpiryHours] = useState(() => Math.round((cacheExpiryMinutes / 60) * 10) / 10)
   const [budgetInput, setBudgetInput] = useState(() => String(costBudget))
+  const [balance, setBalance] = useState(() => getCachedBalance())
   const rootRef = useRef<HTMLSpanElement | null>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -81,6 +82,9 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
   useEffect(() => {
     if (!open) return
     void fetchSessionUsage(props.sessionId, true)
+    // Balance is a network read behind a 60 s cache; opening the panel is the
+    // only moment it is shown, so this is where it is warmed.
+    void fetchBalance().then(setBalance).catch(() => {})
   }, [open, props.sessionId])
 
   useEffect(() => {
@@ -216,6 +220,7 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
     { key: 'cache' as const, label: t('pricing.inputCacheHit'), percent: share.cache, value: fmtTokensM(split.cache) },
     { key: 'output' as const, label: t('common.output'), percent: share.output, value: fmtTokensM(split.output) },
   ]
+  const balanceTotal = balance?.ok === true ? balance.data?.balances?.[0]?.total ?? null : null
 
   const runHandoff = (): void => {
     if (handoff.run()) setOpen(false)
@@ -317,6 +322,14 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
                 </li>
               ))}
             </ul>
+            <p className="dq-session-badge-balance">
+              {t('verdict.balance')}
+              <b>
+                {balanceTotal === null
+                  ? t('sessionBadge.balanceUnknown')
+                  : t('sessionBadge.balanceValue', { amount: balanceTotal })}
+              </b>
+            </p>
             <div className="dq-session-badge-expiry">
               <span>{t('sessionBadge.expiryLabel')}</span>
               <input

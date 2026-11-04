@@ -2,23 +2,49 @@
 
 DSH（DeepSeek Harness）Web 插件，只回答一个问题：**这个会话现在值不值得继续，以及该不该交接。**
 
-会话顶栏显示徽标，接近收尾阈值时在输入框上方给一条提醒，点一下就把交接请求发进当前对话，由模型按六个标题汇总。所有数字都来自本机会话日志，不写任何 DSH 数据，也不上传。
+会话顶栏显示徽标，接近收尾阈值时在输入框上方给一条提醒，点一下就把交接请求发进当前对话，由模型按六个标题汇总。会话数字来自本机会话日志，余额来自 DeepSeek 官方接口；不写任何 DSH 数据，不上传用量。
 
 ## 能看到什么
 
 - **顶栏徽标**：估算花费 · 累计 token · 完成轮数，按状态变色。
-- **弹出面板**：上下文占用、每轮新增、缓存命中率、上下文压缩次数、输出占比（token 与花费两条）、每步均价、闲置时长、单会话预算、模型调用次数。
+- **弹出面板**：上下文占用、每轮新增、缓存命中率、上下文压缩次数、输出占比（token 与花费两条）、每步均价、闲置时长、单会话预算、模型调用次数、账户余额。
 - **输入框提醒**：任一判断依据命中时出现，可「稍后」，升档后再次出现。
 - **一键交接**：把六标题请求写进输入框并发送；输入框已有内容时，第一次点击只提示、不覆盖，第二次点击才替换。
 - **任务已完成，交接**：话题结束时主动交接，不靠计数器猜。
 
 ## 安装
 
+三种装法任选一种，装好后重启 DSH（`dsh --profile web`）生效。host 半边改动需要重启，纯 client 改动刷新页面即可。
+
+### 从 npm（已发布时）
+
 ```sh
 dsh plugin --profile web add @ysfl/dsh-session-budget
 ```
 
-装好后重启 DSH（`dsh --profile web`）生效。host 半边改动需要重启，纯 client 改动刷新页面即可。
+### 从 GitHub（没有 npm 账号也能用）
+
+```sh
+dsh plugin --profile web add github:ysfl/dsh-session-budget
+```
+
+Git 安装时会在本机跑一次 `prepare` 构建 `lib/`，需要 Node.js ≥ 20 与网络拉取 devDependencies。首次安装会比 npm 慢一些。
+
+### 从本地目录或打包文件
+
+```sh
+git clone https://github.com/ysfl/dsh-session-budget.git
+cd dsh-session-budget
+pnpm install
+pnpm run build
+dsh plugin --profile web add /path/to/dsh-session-budget
+```
+
+也可以先 `pnpm pack`，再装生成的压缩包：
+
+```sh
+dsh plugin --profile web add ./ysfl-dsh-session-budget-0.1.0.tgz
+```
 
 ## 口径
 
@@ -33,6 +59,7 @@ dsh plugin --profile web add @ysfl/dsh-session-budget
 | 闲置时长 | 距最后一条用量记录的时间。默认 3 小时，可改；官方未公布前缀缓存 TTL，这个数是估算。 |
 | 会话预算 | 用户设定的单会话花费，默认关闭；没有普适默认值。 |
 | 模型调用 | 只有上下文已 ≥50% 时才计入判断。单独的次数不算理由。 |
+| 账户余额 | 通过宿主凭据服务读取 `DEEPSEEK_API_KEY`，向 DeepSeek 官方 `/user/balance` 查询；结果缓存 60 秒。未配置 Key 时面板显示「未取到余额」。 |
 
 累计 token 只展示，不参与判断。
 
@@ -51,15 +78,16 @@ dsh plugin --profile web add @ysfl/dsh-session-budget
 
 ## 隐私与边界
 
-- 只读本机会话日志，经同源接口 `/api/dsh-session-budget/session?id=…` 返回给页面；不写 DSH 数据。
+- 会话用量只读本机日志，经同源接口 `/api/dsh-session-budget/session?id=…` 返回给页面；不写 DSH 数据。
+- 余额通过宿主凭据服务解析 `DEEPSEEK_API_KEY`，只向 DeepSeek 官方 `/user/balance` 发一次 GET；Key 不落库、不打印、不转发到其他地址。
 - 会话 id 走白名单校验（字母、数字、`-`、`_`，限长 128），拒绝路径分隔符、`..` 与空字节。
-- 不读取凭据、不请求账户余额、不向任何远端服务上传用量。
+- 不向任何第三方上传用量数据；除余额查询外没有出站请求。
 - 测试与示例使用合成会话 id 与合成数值。
 
 ## 已知限制
 
 - 上下文窗口按 1,000,000 估算；宿主没有按模型暴露窗口的接口，换模型后可能不准。
-- 只接入了会话用量这一个数据源；账户余额没有做（那需要凭据服务，本插件刻意不碰）。
+- 余额依赖本机已配置的 `DEEPSEEK_API_KEY`；未配置或接口不可用时，面板显示「未取到余额」，其余数字照常。
 - 价格表是手工维护的；官方调价后需要发版。
 - 旧宿主若不带 `lastCallTokens`，上下文回退为「本轮总 token ÷ 调用次数」。
 - 一句话：数字是估算，用来判断该不该交接，不用来对账。

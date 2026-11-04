@@ -62,6 +62,8 @@ export const css = `
 .dq-session-badge-expiry input{width:56px;box-sizing:border-box;padding:2px 6px;border-radius:6px;border:1px solid var(--dsw-alias-border-l2,rgba(0,0,0,.2));background:var(--dsw-alias-bg-layer-1,#ffffff);color:var(--dsw-alias-label-primary,#1f2328);font-size:12px;font-variant-numeric:tabular-nums}
 .dq-session-badge-expiry input:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,#0969da);outline-offset:1px}
 .dq-session-badge-hint{margin:0;color:var(--dsw-alias-label-tertiary,#59636e)}
+.dq-session-badge-balance{display:flex;justify-content:space-between;gap:12px;margin:0 0 4px;color:var(--dsw-alias-label-secondary,#59636e)}
+.dq-session-badge-balance b{color:var(--dsw-alias-label-primary,#1f2328);font-variant-numeric:tabular-nums}
 /* Wrap-up reminder dock: the additive strip above the composer card, matching
    the host's own queue / todo / goal rows. */
 .dq-handoff-dock{box-sizing:border-box;display:flex;align-items:center;gap:8px;margin:0 auto;padding:7px 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:12px;line-height:1.45}
