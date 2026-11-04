@@ -14,7 +14,7 @@ DSH（DeepSeek Harness）Web 插件，只回答一个问题：**这个会话现�
 
 ## 安装
 
-三种装法任选一种，装好后重启 DSH（`dsh --profile web`）生效。host 半边改动需要重启，纯 client 改动刷新页面即可。
+四种装法任选一种，装好后重启 DSH（`dsh --profile web`）生效。host 半边改动需要重启，纯 client 改动刷新页面即可。
 
 ### 从 npm（已发布时）
 
@@ -22,13 +22,23 @@ DSH（DeepSeek Harness）Web 插件，只回答一个问题：**这个会话现�
 dsh plugin --profile web add @ysfl/dsh-session-budget
 ```
 
-### 从 GitHub（没有 npm 账号也能用）
+### 从 GitHub
 
 ```sh
 dsh plugin --profile web add github:ysfl/dsh-session-budget
 ```
 
-Git 安装时会在本机跑一次 `prepare` 构建 `lib/`，需要 Node.js ≥ 20 与网络拉取 devDependencies。首次安装会比 npm 慢一些。
+仓库推送到 GitHub 后即可用，不需要 npm 账号。
+
+### 从本地 Git 仓（不需要 GitHub 或 npm 账号）
+
+在已经 clone 到本机的仓库目录外执行：
+
+```sh
+dsh plugin --profile web add git+file:///path/to/dsh-session-budget
+```
+
+Git 装法会在本机跑一次 `prepare` 构建 `lib/`，需要 Node.js ≥ 20；首次安装会比 npm 慢一些。
 
 ### 从本地目录或打包文件
 

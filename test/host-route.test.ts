@@ -86,7 +86,7 @@ async function call(
   return { status, body: JSON.parse(payload), cacheControl }
 }
 
-test('the mounted route serves one session and nothing else', async () => {
+test('the mounted route is one prefix serving both endpoints', async () => {
   const routes = mount()
   assert.equal(routes.length, 1)
   assert.equal(routes[0]?.kind, 'prefix')
