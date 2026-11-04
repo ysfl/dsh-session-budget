@@ -14,7 +14,7 @@ DSH（DeepSeek Harness）Web 插件，只回答一个问题：**这个会话现�
 
 ## 安装
 
-四种装法任选一种，装好后重启 DSH（`dsh --profile web`）生效。host 半边改动需要重启，纯 client 改动刷新页面即可。
+四种装法任选一种，装好后重启 DSH 生效。`--profile` 换成你实际在跑的 profile：桌面端是 `desktop`，命令行 Web 端是 `web`。host 半边改动需要重启，纯 client 改动刷新页面即可；插件管理器热加载时可能无需重启。
 
 ### 从 npm（已发布时）
 
