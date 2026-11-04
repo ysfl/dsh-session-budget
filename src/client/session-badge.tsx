@@ -220,7 +220,9 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
     { key: 'cache' as const, label: t('pricing.inputCacheHit'), percent: share.cache, value: fmtTokensM(split.cache) },
     { key: 'output' as const, label: t('common.output'), percent: share.output, value: fmtTokensM(split.output) },
   ]
-  const balanceTotal = balance?.ok === true ? balance.data?.balances?.[0]?.total ?? null : null
+  const balanceInfo = balance?.ok === true ? balance.data?.balances?.[0] : undefined
+  const balanceTotal = balanceInfo?.total ?? null
+  const balanceSymbol = balanceInfo?.currency === 'USD' ? '$' : '¥'
 
   const runHandoff = (): void => {
     if (handoff.run()) setOpen(false)
@@ -327,7 +329,7 @@ export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
               <b>
                 {balanceTotal === null
                   ? t('sessionBadge.balanceUnknown')
-                  : t('sessionBadge.balanceValue', { amount: balanceTotal })}
+                  : t('sessionBadge.balanceValue', { symbol: balanceSymbol, amount: balanceTotal })}
               </b>
             </p>
             <div className="dq-session-badge-expiry">

@@ -56,7 +56,7 @@ export const zh = {
   'verdict.cost': '会话预算',
   'verdict.steps': '模型调用',
   'verdict.balance': '账户余额',
-  'sessionBadge.balanceValue': '¥ {amount}',
+  'sessionBadge.balanceValue': '{symbol} {amount}',
   'sessionBadge.balanceUnknown': '未取到余额',
 
   'reason.context': '上下文已占窗口 {percent}%，再长会更慢也更贵',
@@ -127,7 +127,7 @@ export const en: Record<LocaleKey, string> = {
   'verdict.cost': 'Session budget',
   'verdict.steps': 'Model calls',
   'verdict.balance': 'Balance',
-  'sessionBadge.balanceValue': '¥ {amount}',
+  'sessionBadge.balanceValue': '{symbol} {amount}',
   'sessionBadge.balanceUnknown': 'No balance available',
 
   'reason.context': 'The context already fills {percent}% of the window; longer means slower and dearer',
