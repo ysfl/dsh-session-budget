@@ -8,12 +8,12 @@
  * Colours come from the host's theme tokens only, so dark mode stays legible.
  */
 import { useLayoutEffect, useReducer, useRef, useState, type ReactElement } from 'react'
-import type { InputActionsFace, UseInputHook } from './context.ts'
+import type { InputActionsFace, UseInputHook, UseSessionHook } from './context.ts'
 import { getComposerElement } from './dom.ts'
 import { fmtCost } from './format.ts'
 import { useI18n } from './i18n.tsx'
 import { fmtTokensM, sessionBudgetReasonText, type SessionBudgetStatus } from './session-budget.ts'
-import { useSessionVerdict } from './session-usage.ts'
+import { useSessionRunning, useSessionVerdict } from './session-usage.ts'
 import { useHandoffAction } from './use-handoff.ts'
 
 /** Session → the threshold level the user already waved away. */
@@ -23,11 +23,14 @@ export interface HandoffDockProps {
   sessionId: string
   inputActions: InputActionsFace
   useInput: UseInputHook
+  /** Session summary hook the seat provides; absent on older hosts. */
+  useSession?: UseSessionHook
 }
 
 export function HandoffDock(props: HandoffDockProps): ReactElement | null {
   const { t } = useI18n()
-  const { data, snapshot } = useSessionVerdict(props.sessionId)
+  const running = useSessionRunning(props.useSession)
+  const { data, snapshot } = useSessionVerdict(props.sessionId, running)
   const [, rerender] = useReducer((value: number) => value + 1, 0)
   const [width, setWidth] = useState<number | null>(null)
 

@@ -5,7 +5,7 @@
  * via same-origin fetch.
  */
 import { ErrorBoundary } from './boundary.tsx'
-import type { ClientContext, InputActionsFace, UseInputHook } from './context.ts'
+import type { ClientContext, InputActionsFace, UseInputHook, UseSessionHook } from './context.ts'
 import { LocaleProvider, type Translate } from './i18n.tsx'
 import { en, NS, zh } from './locales.ts'
 import { HandoffDock } from './handoff-dock.tsx'
@@ -36,8 +36,9 @@ export function apply(ctx: ClientContext): void {
   }
 
   // Both surfaces live on Session-scoped seats, because those are the ones that
-  // hand out `sessionId`, the composer snapshot (`useInput`) and
-  // `inputActions` — without them a "one-click handoff" would be a copy-paste.
+  // hand out `sessionId`, the session summary (`useSession`), the composer
+  // snapshot (`useInput`) and `inputActions` — without them a "one-click
+  // handoff" would be a copy-paste.
   ctx.slots.inject('conversation.session.header.utilities', () => ctx.slots.register(
     {
       name: 'conversation.session.header.utilities',
@@ -46,15 +47,21 @@ export function apply(ctx: ClientContext): void {
       locale: NS,
       label: () => t('sessionBadge.label'),
     },
-    ({ t: slotT, sessionId, inputActions, useInput }: {
+    ({ t: slotT, sessionId, inputActions, useInput, useSession }: {
       t: Translate
       sessionId: string
       inputActions: InputActionsFace
       useInput: UseInputHook
+      useSession?: UseSessionHook
     }) => (
       <LocaleProvider t={slotT}>
         <ErrorBoundary>
-          <SessionBadge sessionId={sessionId} inputActions={inputActions} useInput={useInput} />
+          <SessionBadge
+            sessionId={sessionId}
+            inputActions={inputActions}
+            useInput={useInput}
+            useSession={useSession}
+          />
         </ErrorBoundary>
       </LocaleProvider>
     ),
@@ -71,15 +78,21 @@ export function apply(ctx: ClientContext): void {
       locale: NS,
       label: () => t('handoffDock.label'),
     },
-    ({ t: slotT, sessionId, inputActions, useInput }: {
+    ({ t: slotT, sessionId, inputActions, useInput, useSession }: {
       t: Translate
       sessionId: string
       inputActions: InputActionsFace
       useInput: UseInputHook
+      useSession?: UseSessionHook
     }) => (
       <LocaleProvider t={slotT}>
         <ErrorBoundary>
-          <HandoffDock sessionId={sessionId} inputActions={inputActions} useInput={useInput} />
+          <HandoffDock
+            sessionId={sessionId}
+            inputActions={inputActions}
+            useInput={useInput}
+            useSession={useSession}
+          />
         </ErrorBoundary>
       </LocaleProvider>
     ),

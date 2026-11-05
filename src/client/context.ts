@@ -40,6 +40,15 @@ export interface InputSnapshotFace {
 
 export type UseInputHook = <T>(selector: (state: InputSnapshotFace) => T) => T
 
+/** The Session summary a Session-scoped seat exposes through `useSession`.
+ *  Only the field this plugin reads is declared; the host snapshot carries more. */
+export interface SessionSnapshotFace {
+  /** A model turn is in flight; flips false once the turn settles. */
+  running?: boolean
+}
+
+export type UseSessionHook = <T>(selector: (state: SessionSnapshotFace) => T) => T
+
 /** The client context this plugin's apply() receives. */
 export interface ClientContext extends Context {
   slots: SlotsFace

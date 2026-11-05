@@ -27,7 +27,7 @@ host 半边（Node，跑在 DSH 进程里）
   └─ 暴露 GET /api/dsh-session-budget/balance                 →  JSON（60s 缓存）
 client 半边（浏览器，Cordis 插件）
   ├─ 注册两个 Session 作用域的座（见 §4）
-  ├─ 拉取上面的接口（带内存缓存 + 订阅刷新）
+  ├─ 拉取上面的接口（内存缓存 + 订阅刷新：挂载/切会话、每轮结束、空会话重试）
   └─ 渲染徽标 / 面板 / 提醒条
 ```
 
@@ -65,13 +65,16 @@ client 半边（浏览器，Cordis 插件）
 
 | 座 | 类型 | 用途 | 关键 props |
 |---|---|---|---|
-| `conversation.session.header.utilities` | list，需 `id` | 徽标 | `t`、`sessionId`、`inputActions`、`useInput` |
+| `conversation.session.header.utilities` | list，需 `id` | 徽标 | `t`、`sessionId`、`inputActions`、`useInput`、`useSession` |
 | `conversation.input.dock` | list，需 `id` | 提醒条 | 同上 |
 
 - `t` 由注册选项里的 `locale` 触发注入，和座的作用域无关。
 - `inputActions` 至少含 `setDraft(text)` 与 `submit()`；`useInput(state => state.draft)` 读当前草稿。
+- `useSession(state => state.running)` 判断是否有一轮模型调用在途，用来在轮次结束时刷新用量；老宿主不提供该 hook 时降级为只靠空会话重试。
 - root 作用域的座（如 `conversation.header.leading`）**只有只读钩子**，发不出消息，不要往那儿挂。
 - `conversation.composer.bar` 是 composer 本体（single），替换会顶掉输入框，不要用它做提醒条。
+
+刷新时机：宿主在**首次提交**时就渲染这两个座，早于第一条带 `usage` 的 `assistant/message` 落盘，所以新会话的首读通常拿到 `calls: 0`。客户端因此按三个触发刷新：挂载/切换会话、`useSession` 的 `running` 由真转假（一轮结束）、以及 `calls === 0` 期间每 4 秒重试（页面不可见时跳过）。拿到数字后不再常驻轮询，避免长会话被反复重读日志。
 
 ## 5. 判定模型
 
@@ -110,6 +113,7 @@ client 半边（浏览器，Cordis 插件）
 
 - 单测（`pnpm test`）：阈值边界、占比恒等 100、压缩计数、上下文口径（单轮多步不被误判）、草稿保护、预算触发；宿主侧聚合覆盖两代 persistence 接口、非法 id、坏记录跳过；余额覆盖成功解析、缺凭据/缺 Key、HTTP 失败、响应不可解析，以及路由的 60s memo 与 `?refresh=1` 绕过。
 - 隔离渲染实测：esbuild 打包组件 → 静态页 + 伪造 `/session` 与 `/balance` 响应 → 量宽度、查溢出、验证三档变色、Escape 归焦、发送调用记录；明暗两套主题各跑一遍。已完成 14 项检查（徽标文案、dock 与输入框等宽、面板 9 个维度、账户余额行、面板不出视口、无横向溢出、Escape 关闭、空草稿一键发送、非空草稿二次确认、无页面错误），截图留在本机临时目录，未随仓库发布。
+- 空会话自愈实测：用 Playwright 打开运行中的 Web UI，把前两次 `/session` 响应用 route 拦成 `calls: 0`（复现新会话首读），验证第 3 次请求在 4 秒重试后拿回真实数据、徽标出现；修复前只会发一次请求且徽标一直不出现。
 - 门槛：`typecheck`、`test`、`build` 三条；截图与几何数据留档。
 
 ## 9. 里程碑

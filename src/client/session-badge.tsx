@@ -9,7 +9,7 @@
  * The wrap-up numbers themselves are classified in ./session-budget.ts.
  */
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react'
-import type { InputActionsFace, UseInputHook } from './context.ts'
+import type { InputActionsFace, UseInputHook, UseSessionHook } from './context.ts'
 import { fetchBalance, fetchSessionUsage, getCachedBalance } from './api.ts'
 import { fmtCost } from './format.ts'
 import { useI18n } from './i18n.tsx'
@@ -26,7 +26,7 @@ import {
   tokenShare,
   tokenSplitOf,
 } from './session-budget.ts'
-import { useCacheExpiryMinutes, useSessionCostBudget, useSessionVerdict } from './session-usage.ts'
+import { useCacheExpiryMinutes, useSessionCostBudget, useSessionRunning, useSessionVerdict } from './session-usage.ts'
 import { cacheExpiryMinutesStore, sessionCostBudgetStore } from './store.ts'
 import { useHandoffAction } from './use-handoff.ts'
 
@@ -34,11 +34,14 @@ export interface SessionBadgeProps {
   sessionId: string
   inputActions: InputActionsFace
   useInput: UseInputHook
+  /** Session summary hook the seat provides; absent on older hosts. */
+  useSession?: UseSessionHook
 }
 
 export function SessionBadge(props: SessionBadgeProps): ReactElement | null {
   const { t } = useI18n()
-  const { data, snapshot } = useSessionVerdict(props.sessionId)
+  const running = useSessionRunning(props.useSession)
+  const { data, snapshot } = useSessionVerdict(props.sessionId, running)
   const cacheExpiryMinutes = useCacheExpiryMinutes()
   const costBudget = useSessionCostBudget()
   const [open, setOpen] = useState(false)
